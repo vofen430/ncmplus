@@ -1,11 +1,20 @@
 *.exe
 ncmdump
+ncmplus
 
 .vscode
 .idea
 
 build
+build-*/
+build-*.log
+build_configure.log
 
 cmake-build-*
 
 vcpkg_installed
+codex-write-root.tmp
+
+output/
+output-*/
+verify-*/
