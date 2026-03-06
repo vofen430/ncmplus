@@ -1,6 +1,6 @@
-# ncmdump
+# ncmplus
 
-使用本程序可将下载的网易云音乐缓存文件（ncm）转换为 mp3 或 flac 格式
+使用本程序可将下载的网易云音乐缓存文件（ncm）转换为 mp3 或 wav 格式；对于无损文件可使用 `-f` 保留 flac 输出
 
 ## 简介
 
@@ -23,50 +23,64 @@
 使用 `-h` 或 `--help` 参数来打印帮助
 
 ```shell
-ncmdump -h
+ncmplus -h
 ```
 
 使用 `-v` 或 `--version` 参数来打印版本信息
 
 ```shell
-ncmdump -v
+ncmplus -v
 ```
 
 处理单个或多个文件
 
 ```shell
-ncmdump 1.ncm 2.ncm...
+ncmplus 1.ncm 2.ncm...
 ```
 
 使用 `-d` 参数来指定一个文件夹，对文件夹下的所有以 ncm 为扩展名的文件进行批量处理
 
 ```shell
-ncmdump -d source_dir
+ncmplus -d source_dir
 ```
 
 使用 `-r` 配合 `-d` 参数来递归处理文件夹下的所有以 ncm 为扩展名的文件
 
 ```shell
-ncmdump -d source_dir -r
+ncmplus -d source_dir -r
 ```
 
-使用 `-m` 参数来删除源文件若正确处理
+使用 `--remove` 参数时，不再删除文件，而是将受支持的音乐文件（`.ncm`、`.wav`、`.flac`、`.mp3`）以二进制方式清空为 0 字节文件。
+
+对于 `.ncm` 文件，会在成功处理后再清空；对于其余三种格式，会直接清空文件内容。`-r` 与 `-d` 一起使用时，上述逻辑同样会递归生效。
 
 ```shell
-ncmdump -m
+ncmplus 1.ncm --remove
+
+# 递归处理并在成功后清空源 .ncm 内容
+ncmplus -d source_dir -r --remove
 ```
 
-使用 `-o` 参数来指定输出目录，将转换后的文件输出到指定目录，该参数支持与 `-r` 参数一起使用
+默认输出目录为 `./output`，你也可以使用 `-o` 参数来指定输出目录，该参数支持与 `-r` 参数一起使用
 
 ```shell
 # 处理单个或多个文件并输出到指定目录
-ncmdump 1.ncm 2.ncm -o output_dir
+ncmplus 1.ncm 2.ncm -o output_dir
 
 # 处理文件夹下的所有以 ncm 为扩展名并输出到指定目录，不包含子文件夹
-ncmdump -d source_dir -o output_dir
+ncmplus -d source_dir -o output_dir
 
 # 递归处理文件夹并输出到指定目录，并保留目录结构
-ncmdump -d source_dir -o output_dir -r
+ncmplus -d source_dir -o output_dir -r
+```
+
+对于无损类型的 `.ncm`，默认会在解密出 `flac` 后自动继续转成 `wav`；如果你想保留原始 `flac` 输出，可使用 `-f`
+
+```shell
+ncmplus 1.ncm
+
+# 保留无损 flac 输出
+ncmplus 1.ncm -f
 ```
 
 ### 动态库

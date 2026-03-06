@@ -4,12 +4,14 @@
 #include "cJSON.h"
 #include "color.h"
 
+#ifndef NCMPLUS_DISABLE_TAGLIB
 #include <taglib/tfile.h>
 #include <taglib/mpegfile.h>
 #include <taglib/flacfile.h>
 #include <taglib/attachedpictureframe.h>
 #include <taglib/id3v2tag.h>
 #include <taglib/tag.h>
+#endif
 
 #include <stdexcept>
 #include <string>
@@ -200,7 +202,9 @@ std::string NeteaseCrypt::mimeType(std::string &data)
 
 void NeteaseCrypt::FixMetadata()
 {
-
+#ifdef NCMPLUS_DISABLE_TAGLIB
+    return;
+#else
     TagLib::File *audioFile;
     TagLib::Tag *tag;
     TagLib::ByteVector vector(mImageData.c_str(), mImageData.length());
@@ -247,6 +251,7 @@ void NeteaseCrypt::FixMetadata()
 
     audioFile->save();
     audioFile->~File();
+#endif
 }
 
 void NeteaseCrypt::Dump(std::string const &outputDir = "")

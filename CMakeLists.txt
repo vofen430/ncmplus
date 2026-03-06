@@ -1,15 +1,14 @@
 ﻿cmake_minimum_required(VERSION 3.14)
 
-project(ncmdump LANGUAGES CXX)
+project(ncmplus LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(ZLIB)
-find_package(TagLib REQUIRED)
+find_package(TagLib QUIET)
 
 if(MSVC)
-  add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/execution-charset:utf-8>")
+  add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 endif()
 
 FILE(GLOB COMMON_HEADERS src/include/*.h)
@@ -39,7 +38,12 @@ if(WIN32)
 
   target_include_directories(ncmdump_lib PRIVATE src/include)
   set_target_properties(ncmdump_lib PROPERTIES OUTPUT_NAME "libncmdump")
-  target_link_libraries(ncmdump_lib TagLib::tag)
+  if(TagLib_FOUND)
+    target_link_libraries(ncmdump_lib TagLib::tag)
+  else()
+    target_compile_definitions(ncmdump_lib PRIVATE NCMPLUS_DISABLE_TAGLIB=1)
+    message(WARNING "TagLib not found, metadata writing is disabled for libncmdump.")
+  endif()
 
   # msvc 需要额外调整编译选项
   if(MSVC)
@@ -66,11 +70,16 @@ else()
 endif()
 
 # all executable target
-set_target_properties(ncmdump_exec PROPERTIES OUTPUT_NAME "ncmdump")
+set_target_properties(ncmdump_exec PROPERTIES OUTPUT_NAME "ncmplus")
 target_include_directories(ncmdump_exec PRIVATE src/include)
 
 # executable link to taglib
-target_link_libraries(ncmdump_exec TagLib::tag)
+if(TagLib_FOUND)
+  target_link_libraries(ncmdump_exec TagLib::tag)
+else()
+  target_compile_definitions(ncmdump_exec PRIVATE NCMPLUS_DISABLE_TAGLIB=1)
+  message(WARNING "TagLib not found, metadata writing is disabled for ncmplus.")
+endif()
 
 include(GNUInstallDirs)
 

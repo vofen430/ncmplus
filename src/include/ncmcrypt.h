@@ -15,11 +15,11 @@ private:
 	std::string mArtist;
 	std::string mFormat;
 	std::string mName;
-	int mDuration;
-	int mBitrate;
+	int mDuration{0};
+	int mBitrate{0};
 
 private:
-	cJSON* mRaw;
+	cJSON* mRaw{nullptr};
 
 public:
 	NeteaseMusicMetadata(cJSON*);
@@ -44,11 +44,11 @@ private:
 private:
 	std::string mFilepath;
 	std::filesystem::path mDumpFilepath;
-	NcmFormat mFormat;
+	NcmFormat mFormat{MP3};
 	std::string mImageData;
 	std::ifstream mFile;
 	unsigned char mKeyBox[256]{};
-	NeteaseMusicMetadata* mMetaData;
+	NeteaseMusicMetadata* mMetaData{nullptr};
 
 private:
 	bool isNcmFile();
@@ -58,8 +58,9 @@ private:
 	std::string mimeType(std::string& data);
 
 public:
-	const std::string& filepath() const { return mFilepath; }
-	const std::filesystem::path dumpFilepath() const { return mDumpFilepath; }
+    const std::string& filepath() const { return mFilepath; }
+    const std::filesystem::path dumpFilepath() const { return mDumpFilepath; }
+    bool isLossless() const { return mFormat == FLAC; }
 
 public:
 	NeteaseCrypt(std::string const&);
