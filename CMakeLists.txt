@@ -73,6 +73,15 @@ endif()
 set_target_properties(ncmdump_exec PROPERTIES OUTPUT_NAME "ncmplus")
 target_include_directories(ncmdump_exec PRIVATE src/include)
 
+if(WIN32)
+  set(ROOT_RELEASE_ARTIFACT_DIR "${CMAKE_SOURCE_DIR}/release-artifacts")
+  add_custom_command(TARGET ncmdump_exec POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${ROOT_RELEASE_ARTIFACT_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:ncmdump_exec>" "${ROOT_RELEASE_ARTIFACT_DIR}/ncmplus.exe"
+    COMMENT "Copying ncmplus.exe to ${ROOT_RELEASE_ARTIFACT_DIR}"
+  )
+endif()
+
 # executable link to taglib
 if(TagLib_FOUND)
   target_link_libraries(ncmdump_exec TagLib::tag)

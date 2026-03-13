@@ -100,13 +100,38 @@ static std::string shellQuote(const fs::path &path)
     return quoted;
 }
 
+#if defined(_WIN32)
+static std::wstring shellQuoteWide(const fs::path &path)
+{
+    std::wstring quoted = L"\"";
+    for (wchar_t ch : path.wstring())
+    {
+        if (ch == L'\"')
+        {
+            quoted += L"\\\"";
+        }
+        else
+        {
+            quoted += ch;
+        }
+    }
+    quoted += L"\"";
+    return quoted;
+}
+#endif
+
 static bool convertFlacToWav(const fs::path &flacPath, fs::path &wavPath)
 {
     wavPath = flacPath;
     wavPath.replace_extension(".wav");
 
+#if defined(_WIN32)
+    std::wstring command = L"ffmpeg -y -loglevel error -i " + shellQuoteWide(flacPath) + L" -vn " + shellQuoteWide(wavPath);
+    int result = _wsystem(command.c_str());
+#else
     std::string command = "ffmpeg -y -loglevel error -i " + shellQuote(flacPath) + " -vn " + shellQuote(wavPath);
     int result = std::system(command.c_str());
+#endif
 
     if (result != 0 || !fs::exists(wavPath))
     {
