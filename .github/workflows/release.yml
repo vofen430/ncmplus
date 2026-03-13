@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release_windows:
+    name: Windows Release
+    runs-on: windows-latest
+    env:
+      VCPKG_TRIPLET: x64-windows-static
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Install Dependencies
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgJsonGlob: '**/vcpkg.json'
+
+      - name: Configure CMake
+        run: |
+          cmake -B ${{github.workspace}}/build `
+                -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake `
+                -DVCPKG_TARGET_TRIPLET=${{ env.VCPKG_TRIPLET }} `
+                -S ${{github.workspace}}
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config Release
+
+      - name: Stage Release Asset
+        shell: pwsh
+        run: |
+          $dist = Join-Path $env:GITHUB_WORKSPACE 'dist'
+          New-Item -ItemType Directory -Force -Path $dist | Out-Null
+          Copy-Item `
+            (Join-Path $env:GITHUB_WORKSPACE 'release-artifacts\ncmplus.exe') `
+            (Join-Path $dist "ncmplus-${{ github.ref_name }}-windows-x64.exe")
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ github.workspace }}/dist/ncmplus-${{ github.ref_name }}-windows-x64.exe
+          generate_release_notes: true
+          body: |
+            Windows x64 executable built from tag `${{ github.ref_name }}`.
+            The executable can be run directly without adding the project directory to `PATH`.

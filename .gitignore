@@ -20,5 +20,3 @@ output-*/
 verify-*/
 
 release-artifacts/*
-!release-artifacts/
-!release-artifacts/ncmplus.exe
